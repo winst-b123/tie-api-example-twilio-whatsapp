@@ -70,9 +70,9 @@ function handleTwilioMessages(sessionHandler) {
     
     console.log(`RESPONSE (flattened):`);
     console.log(_stringify(res));
-    const triggerFrom = req.headers["From"];
-    const triggerInput = req.headers["Body"];
-    if(from==null) {
+    const triggerFrom = req.headers["from"];
+    const triggerInput = req.headers["body"];
+    if(req.body==undefined) {
       from = triggerFrom ;
       userInput = triggerInput;
       console.log(`from: ${from}`);
