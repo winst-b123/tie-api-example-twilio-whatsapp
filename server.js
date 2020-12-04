@@ -75,7 +75,7 @@ function handleTwilioMessages(sessionHandler) {
     console.log(`from: ${triggerFrom}`);
     console.log(`userInput: ${triggerInput}`);
     
-    if(from=="") {
+    if(from===undefined) {
       from = triggerFrom ;
       userInput = triggerInput;
       console.log(`UPD from: ${from}`);
