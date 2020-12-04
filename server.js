@@ -36,6 +36,25 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // twilio message comes in
 app.post("/", handleTwilioMessages(sessionHandler));
 
+function _stringify (o)
+{
+  const decircularise = ()
+  {
+    const seen = new WeakSet();
+    return (key,val) => 
+    {
+      if( typeof val === "object" && val !== null )
+      {
+        if( seen.has(val) ) return;
+        seen.add(val);
+      }
+      return val;
+    };
+  };
+  
+  return JSON.stringify( o, decircularise() );
+}
+
 // handle incoming twilio message
 function handleTwilioMessages(sessionHandler) {
   return async (req, res) => {
@@ -46,14 +65,13 @@ function handleTwilioMessages(sessionHandler) {
 
     // get message from user
     const userInput = req.body.Body;
-    console.log(`REQUEST:`);
-    console.log(JSON.stringify(req.body));
+    console.log(`REQUEST (flattened):`);
+    console.log(_stringify(req));
 
     // check if we have stored an engine sessionid for this sender
     const teneoSessionId = sessionHandler.getSession(from);
 
-    // send input to engine using stored sessionid and retreive response
-    console.log(`AJ USER INPUT:` + JSON.stringify(req));
+    // send input to engine using stored sessionid and retreive response:
     const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
     console.log(`teneoResponse: ${teneoResponse.output.text}`)
 
