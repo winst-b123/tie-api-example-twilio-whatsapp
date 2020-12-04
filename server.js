@@ -93,13 +93,25 @@ function handleTwilioMessages(sessionHandler) {
     sessionHandler.setSession(from, teneoResponse.sessionId);
 
     // return teneo answer to twilio
-    sendTwilioMessage(teneoResponse, res);
+    sendTwilioMessage(teneoResponse, res, triggerFrom);
   }
 }
 
 // compose and send message
-function sendTwilioMessage(teneoResponse, res) {
-
+function sendTwilioMessage(teneoResponse, res, triggerFrom) {
+ const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
+if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
+client.messages
+      .create({
+         from: 'whatsapp:+14155238886',
+         body: teneoResponse,
+         to: triggerFrom
+       })
+      .then(message => console.log(message.sid));
+}
+ else {
   const message = teneoResponse.output.text;
   const twiml = new MessagingResponse();
 
@@ -108,6 +120,7 @@ function sendTwilioMessage(teneoResponse, res) {
   res.writeHead(200, { 'Content-Type': 'text/xml' });
   res.end(twiml.toString());
    console.log(`twim1: ${twiml.toString()}`);
+ }
 }
 
 
