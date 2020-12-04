@@ -72,6 +72,9 @@ function handleTwilioMessages(sessionHandler) {
     console.log(_stringify(res));
     const triggerFrom = req.headers["from"];
     const triggerInput = req.headers["body"];
+    console.log(`from: ${triggerFrom}`);
+    console.log(`userInput: ${triggerInput}`);
+    
     if(req.body==undefined) {
       from = triggerFrom ;
       userInput = triggerInput;
