@@ -75,11 +75,11 @@ function handleTwilioMessages(sessionHandler) {
     console.log(`from: ${triggerFrom}`);
     console.log(`userInput: ${triggerInput}`);
     
-    if(req.body==undefined) {
+    if(from=="") {
       from = triggerFrom ;
       userInput = triggerInput;
-      console.log(`from: ${from}`);
-      console.log(`userInput: ${userInput}`);
+      console.log(`UPD from: ${from}`);
+      console.log(`UPD userInput: ${userInput}`);
     }
 
     // check if we have stored an engine sessionid for this sender
