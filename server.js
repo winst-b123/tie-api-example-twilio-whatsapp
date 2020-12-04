@@ -60,11 +60,11 @@ function handleTwilioMessages(sessionHandler) {
   return async (req, res) => {
 
     // get the sender's phone number
-    const from = req.body.From;
+    var from = req.body.From;
     console.log(`from: ${from}`);
 
     // get message from user
-    const userInput = req.body.Body;
+    var userInput = req.body.Body;
     console.log(`REQUEST (flattened):`);
     console.log(_stringify(req));
     
