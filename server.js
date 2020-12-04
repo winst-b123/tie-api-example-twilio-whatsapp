@@ -19,6 +19,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const TIE = require('@artificialsolutions/tie-api-client');
+const {
+    TENEO_ENGINE_URL,
+    TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN,
+    TWILIO_OUTBOUND_NUMBER
+} = process.env;
 
 const port = process.env.PORT || 4337;
 const teneoEngineUrl = process.env.TENEO_ENGINE_URL;
@@ -99,13 +105,11 @@ function handleTwilioMessages(sessionHandler) {
 
 // compose and send message
 function sendTwilioMessage(teneoResponse, res, triggerFrom) {
- const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
+const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
 client.messages
       .create({
-         from: 'whatsapp:+14155238886',
+         from: TWILIO_OUTBOUND_NUMBER,
          body: teneoResponse,
          to: triggerFrom
        })
