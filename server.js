@@ -108,10 +108,13 @@ function sendTwilioMessage(teneoResponse, res, triggerFrom) {
 const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
     console.log('trying to send outbound message');
+    console.log(`teneoResponse: ${teneoResponse.output.text}`)
+    console.log(`to: ${triggerFrom}`)
+    console.log(`from: ${TWILIO_OUTBOUND_NUMBER}`)
 client.messages
       .create({
          from: TWILIO_OUTBOUND_NUMBER,
-         body: teneoResponse,
+         body:  teneoResponse.output.text,
          to: triggerFrom
        })
       .then(message => console.log(message.sid));
