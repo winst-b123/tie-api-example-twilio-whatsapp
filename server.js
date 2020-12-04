@@ -46,7 +46,8 @@ function handleTwilioMessages(sessionHandler) {
 
     // get message from user
     const userInput = req.body.Body;
-    console.log(`userInput: ${userInput}`);
+    console.log(`userInput:`);
+    console.log(JSON.stringify(req.body));
 
     // check if we have stored an engine sessionid for this sender
     const teneoSessionId = sessionHandler.getSession(from);
