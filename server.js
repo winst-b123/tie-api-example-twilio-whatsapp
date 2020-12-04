@@ -70,6 +70,14 @@ function handleTwilioMessages(sessionHandler) {
     
     console.log(`RESPONSE (flattened):`);
     console.log(_stringify(res));
+    const triggerFrom = req.headers["From"];
+    const triggerInput = req.headers["Body"];
+    if(from==null) {
+      from = triggerFrom ;
+      userInput = triggerInput;
+      console.log(`from: ${from}`);
+      console.log(`userInput: ${userInput}`);
+    }
 
     // check if we have stored an engine sessionid for this sender
     const teneoSessionId = sessionHandler.getSession(from);
