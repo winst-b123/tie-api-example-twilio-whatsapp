@@ -38,7 +38,7 @@ app.post("/", handleTwilioMessages(sessionHandler));
 
 function _stringify (o)
 {
-  const decircularise = ()
+  const decircularise = () =>
   {
     const seen = new WeakSet();
     return (key,val) => 
