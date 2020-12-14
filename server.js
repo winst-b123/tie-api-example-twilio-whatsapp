@@ -92,14 +92,14 @@ function handleTwilioMessages(sessionHandler) {
     const teneoSessionId = sessionHandler.getSession(from);
     var teneoResponse;
     if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
-        teneoResponse = "";
+        teneoResponse = userInput;
     }
     else {
         // send input to engine using stored sessionid and retreive response:
         teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
+        console.log(`teneoResponse: ${teneoResponse.output.text}`)
     }
-    console.log(`teneoResponse: ${teneoResponse.output.text}`)
-
+    
     // store engine sessionid for this sender
     sessionHandler.setSession(from, teneoResponse.sessionId);
 
@@ -117,9 +117,9 @@ if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
     console.log(`from: ${TWILIO_OUTBOUND_NUMBER}`)
 client.messages
       .create({
-         from: TWILIO_OUTBOUND_NUMBER,
-         body:  teneoResponse.output.text,
-         to: triggerFrom
+         from: triggerFrom,
+         body:  teneoResponse,
+         to: TWILIO_OUTBOUND_NUMBER
        })
       .then(message => console.log(message.sid));
 }
