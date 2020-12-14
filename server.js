@@ -84,21 +84,16 @@ function handleTwilioMessages(sessionHandler) {
     if(from===undefined || from===null || from=="") {
       from = triggerFrom ;
       userInput = triggerInput;
-      console.log(`UPD from: ${from}`);
-      console.log(`UPD userInput: ${userInput}`);
+      console.log(`UPD1 from: ${from}`);
+      console.log(`UPD2 userInput: ${userInput}`);
     }
 
     // check if we have stored an engine sessionid for this sender
     const teneoSessionId = sessionHandler.getSession(from);
-    var teneoResponse;
-    if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
-        teneoResponse = userInput;
-    }
-    else {
-        // send input to engine using stored sessionid and retreive response:
-        teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
-        console.log(`teneoResponse: ${teneoResponse.output.text}`)
-    }
+    // send input to engine using stored sessionid and retreive response:
+    const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
+    console.log(`teneoResponse: ${teneoResponse.output.text}`)
+    
     
     // store engine sessionid for this sender
     sessionHandler.setSession(from, teneoResponse.sessionId);
@@ -117,9 +112,9 @@ if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
     console.log(`from: ${TWILIO_OUTBOUND_NUMBER}`)
 client.messages
       .create({
-         from: triggerFrom,
-         body:  teneoResponse,
-         to: TWILIO_OUTBOUND_NUMBER
+         from: TWILIO_OUTBOUND_NUMBER,
+         body:  teneoResponse.output.text,
+         to: triggerFrom
        })
       .then(message => console.log(message.sid));
 }
