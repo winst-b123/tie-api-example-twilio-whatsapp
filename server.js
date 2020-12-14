@@ -90,12 +90,13 @@ function handleTwilioMessages(sessionHandler) {
 
     // check if we have stored an engine sessionid for this sender
     const teneoSessionId = sessionHandler.getSession(from);
+    var teneoResponse;
     if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
-        const teneoResponse = "";
+        teneoResponse = "";
     }
     else {
         // send input to engine using stored sessionid and retreive response:
-        const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
+        teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
     }
     console.log(`teneoResponse: ${teneoResponse.output.text}`)
 
