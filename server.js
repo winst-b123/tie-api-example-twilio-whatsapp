@@ -80,8 +80,8 @@ function handleTwilioMessages(sessionHandler) {
     const triggerInput = req.headers["body"];
     console.log(`from: ${triggerFrom}`);
     console.log(`userInput: ${triggerInput}`);
-    var teneoSessionId = req.headers["Session"];
-    console.log(`session ID: ${teneoSessionId}`);
+    var teneoSessionId = req.headers["session"];
+    console.log(`my session ID: ${teneoSessionId}`);
     if(from===undefined || from===null || from=="") {
       from = triggerFrom ;
       userInput = triggerInput;
