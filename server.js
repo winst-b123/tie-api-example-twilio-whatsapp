@@ -119,7 +119,7 @@ function handleTwilioMessages(sessionHandler) {
 function sendTwilioMessage(teneoResponse, res, triggerFrom) {
 const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
-    console.log('trying to send outbound message');
+    console.log('trying to send outbound message: ${teneoResponse}');
     console.log(`to: ${triggerFrom}`)
     console.log(`from: ${TWILIO_OUTBOUND_NUMBER}`)
 client.messages
