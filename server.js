@@ -88,20 +88,25 @@ function handleTwilioMessages(sessionHandler) {
       console.log(`UPD1 from: ${from}`);
       console.log(`UPD2 userInput: ${userInput}`);
     }
+    var teneoResponse = "";
 
     // check if we have stored an engine sessionid for this sender
     if(teneoSessionId===undefined || teneoSessionId===null || teneoSessionId=="") {
     teneoSessionId = sessionHandler.getSession(from);
-    }
+    
      
     console.log(`my session ID: ${teneoSessionId}`);
     // send input to engine using stored sessionid and retreive response:
-    const teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
-    console.log(`teneoResponse: ${teneoResponse.output.text}`)
-    
+    teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
+    console.log(`teneoResponse: ${teneoResponse.output.text}`);
+    teneoSessionId = teneoResponse.sessionId;
+    }
+    else {
+        teneoResponse = "Okay switched you over to WhatsApp."  ;
+    }
     
     // store engine sessionid for this sender
-    sessionHandler.setSession(from, teneoResponse.sessionId);
+    sessionHandler.setSession(from, teneoSessionId);
 
     // return teneo answer to twilio
     sendTwilioMessage(teneoResponse, res, triggerFrom);
