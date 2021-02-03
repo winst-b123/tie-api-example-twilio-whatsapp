@@ -90,7 +90,7 @@ function handleTwilioMessages(sessionHandler) {
     }
 
     // check if we have stored an engine sessionid for this sender
-    if(teneoSessionId===undefined || teneoSessionId===null || teneoSessionId="") {
+    if(teneoSessionId===undefined || teneoSessionId===null || teneoSessionId=="") {
     teneoSessionId = sessionHandler.getSession(from);
     }
      console.log(`session ID : ${o0d}`);
