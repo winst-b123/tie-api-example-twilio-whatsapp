@@ -103,7 +103,7 @@ function handleTwilioMessages(sessionHandler) {
     teneoSessionId = teneoResponse.sessionId;
     }
     else {
-        teneoResponse = "Okay switched you over to WhatsApp."  ;
+        teneoResponse = userInput;
         console.log(`teneoResponse: ${teneoResponse}`);
     }
     
