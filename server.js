@@ -99,10 +99,12 @@ function handleTwilioMessages(sessionHandler) {
     // send input to engine using stored sessionid and retreive response:
     teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
     console.log(`teneoResponse: ${teneoResponse.output.text}`);
+    teneoResponse = teneoResponse.output.text;
     teneoSessionId = teneoResponse.sessionId;
     }
     else {
         teneoResponse = "Okay switched you over to WhatsApp."  ;
+        console.log(`teneoResponse: ${teneoResponse}`);
     }
     
     // store engine sessionid for this sender
@@ -123,13 +125,13 @@ if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
 client.messages
       .create({
          from: TWILIO_OUTBOUND_NUMBER,
-         body:  teneoResponse.output.text,
+         body:  teneoResponse,
          to: triggerFrom
        })
       .then(message => console.log(message.sid));
 }
  else {
-  const message = teneoResponse.output.text;
+  const message = teneoResponse;
   const twiml = new MessagingResponse();
 
   twiml.message(message);
