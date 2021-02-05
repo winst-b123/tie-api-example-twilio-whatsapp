@@ -28,7 +28,19 @@ const {
 
 const port = process.env.PORT || 4337;
 const teneoEngineUrl = process.env.TENEO_ENGINE_URL;
+const postPath = {
+    default: '/'
+};
 
+const teneoApi = TIE.init(TENEO_ENGINE_URL);
+const twilioLanguage = LANGUAGE_STT || 'en-US'; // See: https://www.twilio.com/docs/voice/twiml/gather#languagetags
+const twilioVoiceName = LANGUAGE_TTS || 'Polly.Joanna'; // See: https://www.twilio.com/docs/voice/twiml/say/text-speech#amazon-polly
+
+let twilioActions = {
+    outbound_call: '/outbound',
+    hang_up: '/hang_up'
+};
+let twilioAction = postPath.default;
 const app = express();
 
 // initalise teneo
@@ -64,7 +76,7 @@ function _stringify (o)
 // handle incoming twilio message
 function handleTwilioMessages(sessionHandler) {
   return async (req, res) => {
-
+    console.log("in handleTwilioMessages");
     // get the sender's phone number
     var from = req.body.From;
     console.log(`from: ${from}`);
