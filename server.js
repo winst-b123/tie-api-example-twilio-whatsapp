@@ -32,10 +32,6 @@ const postPath = {
     default: '/'
 };
 
-const teneoApi = TIE.init(TENEO_ENGINE_URL);
-const twilioLanguage = LANGUAGE_STT || 'en-US'; // See: https://www.twilio.com/docs/voice/twiml/gather#languagetags
-const twilioVoiceName = LANGUAGE_TTS || 'Polly.Joanna'; // See: https://www.twilio.com/docs/voice/twiml/say/text-speech#amazon-polly
-
 let twilioActions = {
     outbound_call: '/outbound',
     hang_up: '/hang_up'
