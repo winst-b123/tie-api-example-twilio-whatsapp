@@ -14,10 +14,30 @@
  * limitations under the License.
  */
 
+
+const postPath = {
+  default: '/',
+  outbound: "/outbound"
+};
 const http = require('http');
 const express = require('express');
-const bodyParser = require('body-parser');
 const path = require('path');
+//const bodyParser = require('body-parser');
+/**
+ * Initialise variables using environment parameters
+ */
+const dotenv = require('dotenv');
+dotenv.config();
+const port = process.env.PORT || 3000 ;
+
+// initialize an Express application
+const app = express();
+const router = express.Router();
+
+// Tell express to use this router with /api before.
+app.use(postPath.default, router);
+
+
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const TIE = require('@artificialsolutions/tie-api-client');
 const {
@@ -26,21 +46,9 @@ const {
     TWILIO_AUTH_TOKEN,
     TWILIO_OUTBOUND_NUMBER
 } = process.env;
-const postPath = {
-  default: '/',
-  outbound: "/outbound"
-};
-const port = process.env.PORT || 4337;
+
+//const port = process.env.PORT || 4337;
 const teneoEngineUrl = process.env.TENEO_ENGINE_URL;
-
-const app = express();
-const dotenv = require('dotenv');
-dotenv.config();
-// initialize an Express application
-const router = express.Router();
-
-// Tell express to use this router with /api before.
-app.use(postPath.default, router);
 
 // initalise teneo
 const teneoApi = TIE.init(teneoEngineUrl);
@@ -48,7 +56,7 @@ const teneoApi = TIE.init(teneoEngineUrl);
 // initialise session handler, to store mapping between sender's phone number and the engine session id
 const sessionHandler = SessionHandler();
 
-app.use(bodyParser.urlencoded({ extended: false }));
+//app.use(bodyParser.urlencoded({ extended: false }));
 
 // twilio message comes in
 router.all(postPath.default, handleTwilioMessages(sessionHandler));
