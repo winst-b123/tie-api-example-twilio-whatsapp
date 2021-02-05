@@ -37,7 +37,7 @@ const router = express.Router();
 // Tell express to use this router with /api before.
 app.use(postPath.default, router);
 
-
+console.log("I am here");
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const TIE = require('@artificialsolutions/tie-api-client');
 const {
