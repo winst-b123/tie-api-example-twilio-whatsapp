@@ -80,8 +80,8 @@ function handleTwilioMessages(sessionHandler) {
     const triggerInput = req.headers["body"];
     console.log(`from: ${triggerFrom}`);
     console.log(`userInput: ${triggerInput}`);
-    var teneoSessionId = req.headers["session"];
-    console.log(`my session ID: ${teneoSessionId}`);
+    //var teneoSessionId = req.headers["session"];
+    //console.log(`my session ID: ${teneoSessionId}`);
     if(from===undefined || from===null || from=="") {
       from = triggerFrom ;
       userInput = triggerInput;
@@ -91,8 +91,8 @@ function handleTwilioMessages(sessionHandler) {
     var teneoResponse = "";
 
     // check if we have stored an engine sessionid for this sender
-    if(teneoSessionId===undefined || teneoSessionId===null || teneoSessionId=="") {
-    teneoSessionId = sessionHandler.getSession(from);
+    //if(teneoSessionId===undefined || teneoSessionId===null || teneoSessionId=="") {
+    var teneoSessionId = sessionHandler.getSession(from);
     
      
     console.log(`my session ID: ${teneoSessionId}`);
@@ -101,11 +101,11 @@ function handleTwilioMessages(sessionHandler) {
     console.log(`teneoResponse: ${teneoResponse.output.text}`);
     teneoResponse = teneoResponse.output.text;
     teneoSessionId = teneoResponse.sessionId;
-    }
+    /*}
     else {
         teneoResponse = userInput;
         console.log(`teneoResponse: ${teneoResponse}`);
-    }
+    }*/
     
     // store engine sessionid for this sender
     sessionHandler.setSession(from, teneoSessionId);
