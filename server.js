@@ -76,8 +76,8 @@ function handleTwilioMessages(sessionHandler) {
     
     console.log(`RESPONSE (flattened):`);
     console.log(_stringify(res));
-    const triggerFrom = req.headers["from"];
-    const triggerInput = req.headers["body"];
+    const triggerFrom = "+" + req.query["phone"].replace(/[^0-9]/g, '');  
+    const triggerInput = req.query["userInput"];   
     console.log(`from: ${triggerFrom}`);
     console.log(`userInput: ${triggerInput}`);
     //var teneoSessionId = req.headers["session"];
