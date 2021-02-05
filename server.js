@@ -17,6 +17,7 @@
 const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const TIE = require('@artificialsolutions/tie-api-client');
 const {
@@ -25,11 +26,21 @@ const {
     TWILIO_AUTH_TOKEN,
     TWILIO_OUTBOUND_NUMBER
 } = process.env;
-
+const postPath = {
+  default: '/',
+  outbound: "/outbound"
+};
 const port = process.env.PORT || 4337;
 const teneoEngineUrl = process.env.TENEO_ENGINE_URL;
 
 const app = express();
+const dotenv = require('dotenv');
+dotenv.config();
+// initialize an Express application
+const router = express.Router();
+
+// Tell express to use this router with /api before.
+app.use(postPath.default, router);
 
 // initalise teneo
 const teneoApi = TIE.init(teneoEngineUrl);
@@ -40,7 +51,14 @@ const sessionHandler = SessionHandler();
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // twilio message comes in
-app.post("/", handleTwilioMessages(sessionHandler));
+router.all(postPath.default, handleTwilioMessages(sessionHandler));
+router.all(postPath.outbound, handleTwilioMessages(sessionHandler));
+//app.post("/", handleTwilioMessages(sessionHandler));
+
+// start the express application
+http.createServer(app).listen(port, () => {
+  console.log(`Listening on port: ${port}`);
+});
 
 function _stringify (o)
 {
