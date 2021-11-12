@@ -47,6 +47,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // twilio message comes in
 //app.post("/outbound", handleTwilioMessages(sessionHandler));
 app.post("/", handleAPIMessages(sessionHandler));
+app.get("/", handleAPIMessages(sessionHandler));
 
 function _stringify (o)
 {
