@@ -32,8 +32,8 @@ const postPath = {
 /*let twilioActions = {
     outbound_call: '/outbound',
     hang_up: '/hang_up'
-};
-let twilioAction = postPath.default;*/
+};*/
+let twilioAction = postPath.default;
 const app = express();
 
 // initalise teneo
