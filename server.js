@@ -105,7 +105,7 @@ function handleAPIMessages(sessionHandler) {
     // send input to engine using stored sessionid and retreive response:
     teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'cai-connector' });
     console.log(`teneoResponse: ${teneoResponse.output.text}`);
-      console.log(`teneoResponse: ${teneoResponse}`);
+    console.log(_stringify(teneoResponse));
     teneoSessionId = teneoResponse.sessionId;
     
     // store engine sessionid for this sender
