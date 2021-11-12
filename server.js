@@ -83,14 +83,13 @@ function handleAPIMessages(sessionHandler) {
     
     console.log(`RESPONSE (flattened):`);
     console.log(_stringify(res));
-    const triggerFrom = "+" + req.query["phone"].replace(/[^0-9]/g, '');  
+    //const triggerFrom = "+" + req.query["phone"].replace(/[^0-9]/g, '');  
     const triggerInput = req.query["userInput"];   
-    console.log(`from: ${triggerFrom}`);
+    //console.log(`from: ${triggerFrom}`);
     console.log(`userInput: ${triggerInput}`);
     var teneoSessionId = req.headers["session"];
     console.log(`my session ID: ${teneoSessionId}`);
     if(from===undefined || from===null || from=="") {
-      from = triggerFrom ;
       userInput = triggerInput;
       console.log(`UPD1 from: ${from}`);
       console.log(`UPD2 userInput: ${userInput}`);
