@@ -113,7 +113,7 @@ function handleAPIMessages(sessionHandler) {
 
     // return teneo answer to twilio
      res.writeHead(200, { 'Content-Type': 'text/json' });
-    res.end(teneoResponse.toString());
+    res.end(_stringify(teneoResponse));
    //return teneoResponse;
   }
 }
