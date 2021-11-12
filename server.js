@@ -112,9 +112,9 @@ function handleAPIMessages(sessionHandler) {
     sessionHandler.setSession(from, teneoSessionId);
 
     // return teneo answer to twilio
-     // res.writeHead(200, { 'Content-Type': 'text/json' });
-    //res.end(teneoResponse.toString());
-   return teneoResponse;
+     res.writeHead(200, { 'Content-Type': 'text/json' });
+    res.end(teneoResponse.toString());
+   //return teneoResponse;
   }
 }
 
