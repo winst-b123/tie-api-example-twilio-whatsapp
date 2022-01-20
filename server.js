@@ -82,8 +82,8 @@ function handleAPIMessages(sessionHandler) {
             });
 
             req.on('end', async function () {
-     var post = qs.parse(body);
-     console.log(_stringify(post));
+     var post = JSON.parse(body);
+     console.log(post.userInput);
     // get the sender's phone number
     var from = body.from;
     console.log(`from: ${from}`);
