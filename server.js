@@ -84,19 +84,27 @@ function handleAPIMessages(sessionHandler) {
             req.on('end', async function () {
      const triggerInput = req.query["userInput"];   
      var post ;
+     var from ;
+     var userInput;
+     var apiKey;
      if(triggerInput===undefined || triggerInput===null) {
     post = JSON.parse(body);
+         from = post.from;
+         userInput = post.userInput;
+         apiKey = post.apiKey;
      }
-     
-    // get the sender's phone number
-    var from = post.from;
+      if(userInput===undefined || userInput===null || userInput=="") {
+      userInput = triggerInput;
+      apiKey =  req.query["apiKey"];   
+      from = req.query["from"];   
+      console.log(`UPD3 from: ${from}`);
+      console.log(`UPD4 userInput: ${userInput}`);
+    }
     console.log(`from: ${from}`);
     console.log(`body: ${body}`);
    
     // get message from user
-    var userInput = post.userInput;
       console.log(userInput);
-      var apiKey = post.apiKey;
       console.log(apiKey);
     console.log(`REQUEST (flattened):`);
     console.log(_stringify(req));
@@ -110,11 +118,7 @@ function handleAPIMessages(sessionHandler) {
     var teneoSessionId = req.headers["session"];
     console.log(`my session ID: ${teneoSessionId}`);
 
-    if(userInput===undefined || userInput===null || userInput=="") {
-      userInput = triggerInput;
-      console.log(`UPD3 from: ${from}`);
-      console.log(`UPD4 userInput: ${userInput}`);
-    }
+
     var teneoResponse = "";
 
     // check if we have stored an engine sessionid for this sender
