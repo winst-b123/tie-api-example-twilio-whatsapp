@@ -86,6 +86,7 @@ function handleAPIMessages(sessionHandler) {
     // get the sender's phone number
     var from = post.from;
     console.log(`from: ${from}`);
+    console.log(`body: ${body}`);
 
     // get message from user
     var userInput = post.userInput;
