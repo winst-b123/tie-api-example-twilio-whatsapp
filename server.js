@@ -82,7 +82,11 @@ function handleAPIMessages(sessionHandler) {
             });
 
             req.on('end', async function () {
-     var post = JSON.parse(body);
+     const triggerInput = req.query["userInput"];   
+     var post ;
+     if(triggerInput===undefined || triggerInput===null) {
+    post = JSON.parse(body);
+     }
      
     // get the sender's phone number
     var from = post.from;
@@ -100,7 +104,7 @@ function handleAPIMessages(sessionHandler) {
     console.log(`RESPONSE (flattened):`);
     console.log(_stringify(res));
     //const triggerFrom = "+" + req.query["phone"].replace(/[^0-9]/g, '');  
-    const triggerInput = req.query["userInput"];   
+   
     //console.log(`from: ${triggerFrom}`);
     console.log(`userInput: ${triggerInput}`);
     var teneoSessionId = req.headers["session"];
