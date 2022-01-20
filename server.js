@@ -131,7 +131,7 @@ function handleAPIMessages(sessionHandler) {
      res.writeHead(200, { 'Content-Type': 'text/json' });
     res.end(_stringify(teneoResponse));
    //return teneoResponse;
-  }
+  });
 }
                    }
 
