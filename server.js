@@ -100,6 +100,9 @@ function handleAPIMessages(sessionHandler) {
       console.log(`UPD3 from: ${from}`);
       console.log(`UPD4 userInput: ${userInput}`);
     }
+     if(apiKey===undefined || apiKey===null || apiKey=="") {
+         apiKey="";
+     }
     console.log(`from: ${from}`);
     console.log(`body: ${body}`);
    
