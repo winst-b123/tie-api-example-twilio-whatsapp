@@ -84,13 +84,12 @@ function handleAPIMessages(sessionHandler) {
             req.on('end', async function () {
      var post = qs.parse(body);
     // get the sender's phone number
-    var from = post.from;
+    var from = body.from;
     console.log(`from: ${from}`);
     console.log(`body: ${body}`);
-    console.log(`post: ${post}`);
-
+   
     // get message from user
-    var userInput = post.userInput;
+    var userInput = body.userInput;
       console.log(userInput);
     console.log(`REQUEST (flattened):`);
     console.log(_stringify(req));
@@ -103,11 +102,7 @@ function handleAPIMessages(sessionHandler) {
     console.log(`userInput: ${triggerInput}`);
     var teneoSessionId = req.headers["session"];
     console.log(`my session ID: ${teneoSessionId}`);
-    if(userInput===undefined || userInput===null || userInput=="") {
-      userInput = req.body.userInput;
-      console.log(`UPD1 from: ${from}`);
-      console.log(`UPD2 userInput: ${userInput}`);
-    }
+
     if(userInput===undefined || userInput===null || userInput=="") {
       userInput = triggerInput;
       console.log(`UPD3 from: ${from}`);
