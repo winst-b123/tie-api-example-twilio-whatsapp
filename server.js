@@ -72,12 +72,22 @@ function _stringify (o)
 function handleAPIMessages(sessionHandler) {
   return async (req, res) => {
     console.log("in handleAPIMessages");
+      
+    console.log("INBOUND START " );
+            let body = '';
+
+            req.on('data', function (data) {
+                body += data;
+            });
+
+            req.on('end', async function () {
+     var post = qs.parse(body);
     // get the sender's phone number
-    var from = req.body.From;
+    var from = post.from;
     console.log(`from: ${from}`);
 
     // get message from user
-    var userInput = req.body.Body;
+    var userInput = post.userInput;
       console.log(userInput);
     console.log(`REQUEST (flattened):`);
     console.log(_stringify(req));
@@ -123,7 +133,7 @@ function handleAPIMessages(sessionHandler) {
    //return teneoResponse;
   }
 }
-
+                   }
 
 
 
