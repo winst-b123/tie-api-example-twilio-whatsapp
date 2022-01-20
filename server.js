@@ -87,6 +87,7 @@ function handleAPIMessages(sessionHandler) {
     var from = post.from;
     console.log(`from: ${from}`);
     console.log(`body: ${body}`);
+    console.log(`post: ${post}`);
 
     // get message from user
     var userInput = post.userInput;
