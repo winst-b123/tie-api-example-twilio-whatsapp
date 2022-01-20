@@ -78,6 +78,7 @@ function handleAPIMessages(sessionHandler) {
 
     // get message from user
     var userInput = req.body.Body;
+      console.log(userInput);
     console.log(`REQUEST (flattened):`);
     console.log(_stringify(req));
     
