@@ -127,7 +127,7 @@ function handleAPIMessages(sessionHandler) {
 
     // check if we have stored an engine sessionid for this sender
     
-    var teneoSessionId = sessionHandler.getSession(from);
+    var teneoSessionId = sessionHandler.getSession("");
     
      
     console.log(`my session ID: ${teneoSessionId}`);
