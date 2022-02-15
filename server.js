@@ -14,28 +14,41 @@
  * limitations under the License.
  */
 
+
+const postPath = {
+  default: '/',
+  outbound: "/outbound"
+};
 const http = require('http');
 const express = require('express');
-const qs = require('querystring');
-const bodyParser = require('body-parser');
-//const MessagingResponse = require('twilio').twiml.MessagingResponse;
+const path = require('path');
+//const bodyParser = require('body-parser');
+/**
+ * Initialise variables using environment parameters
+ */
+const dotenv = require('dotenv');
+dotenv.config();
+const port = process.env.PORT || 3000 ;
+
+// initialize an Express application
+const app = express();
+const router = express.Router();
+
+// Tell express to use this router with /api before.
+app.use(postPath.default, router);
+
+console.log("I am here");
+const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const TIE = require('@artificialsolutions/tie-api-client');
 const {
-    TENEO_ENGINE_URL
+    TENEO_ENGINE_URL,
+    TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN,
+    TWILIO_OUTBOUND_NUMBER
 } = process.env;
 
-const port = process.env.PORT || 4337;
+//const port = process.env.PORT || 4337;
 const teneoEngineUrl = process.env.TENEO_ENGINE_URL;
-const postPath = {
-    default: '/'
-};
-
-/*let twilioActions = {
-    outbound_call: '/outbound',
-    hang_up: '/hang_up'
-};*/
-let twilioAction = postPath.default;
-const app = express();
 
 // initalise teneo
 const teneoApi = TIE.init(teneoEngineUrl);
@@ -43,12 +56,17 @@ const teneoApi = TIE.init(teneoEngineUrl);
 // initialise session handler, to store mapping between sender's phone number and the engine session id
 const sessionHandler = SessionHandler();
 
-app.use(bodyParser.urlencoded({ extended: false }));
+//app.use(bodyParser.urlencoded({ extended: false }));
 
 // twilio message comes in
-//app.post("/outbound", handleTwilioMessages(sessionHandler));
-app.post("/", handleAPIMessages(sessionHandler));
-app.get("/", handleAPIMessages(sessionHandler));
+router.all(postPath.default, handleTwilioMessages(sessionHandler));
+router.all(postPath.outbound, handleTwilioMessages(sessionHandler));
+//app.post("/", handleTwilioMessages(sessionHandler));
+
+// start the express application
+http.createServer(app).listen(port, () => {
+  console.log(`Listening on port: ${port}`);
+});
 
 function _stringify (o)
 {
@@ -70,84 +88,85 @@ function _stringify (o)
 }
 
 // handle incoming twilio message
-function handleAPIMessages(sessionHandler) {
+function handleTwilioMessages(sessionHandler) {
   return async (req, res) => {
-    console.log("in handleAPIMessages");
-      
-    console.log("INBOUND START " );
-            let body = '';
 
-            req.on('data', function (data) {
-                body += data;
-            });
+    // get the sender's phone number
+    var from = req.body.From;
+    console.log(`from: ${from}`);
 
-            req.on('end', async function () {
-     const triggerInput = req.query["userInput"];   
-     var post ;
-     var userInput;
-     var apiKey;
-     var headerApiKey;     
-
-     if(triggerInput===undefined || triggerInput===null) {
-    post = JSON.parse(body);
-         userInput = post.userInput;
-         apiKey = post.apiKey;
-     }
-      if(userInput===undefined || userInput===null || userInput=="") {
-      userInput = triggerInput;
-      apiKey =  req.query["apiKey"];   
-      headerApiKey = req.headers["apiKey"];   
-      console.log(`headerApiKey from call: ${headerApiKey}`);
-
-      console.log(`UPD4 userInput: ${userInput}`);
-    }
-     if(apiKey===undefined || apiKey===null || apiKey=="") {
-         apiKey="";
-     }
-     
-    console.log(`body: ${body}`);
-   
     // get message from user
-      console.log(userInput);
-      console.log(apiKey);
+    var userInput = req.body.Body;
     console.log(`REQUEST (flattened):`);
     console.log(_stringify(req));
     
     console.log(`RESPONSE (flattened):`);
     console.log(_stringify(res));
-    //const triggerFrom = "+" + req.query["phone"].replace(/[^0-9]/g, '');  
-   
-    //console.log(`from: ${triggerFrom}`);
+    const triggerFrom = req.headers["from"];
+    const triggerInput = req.headers["body"];
+    console.log(`from: ${triggerFrom}`);
     console.log(`userInput: ${triggerInput}`);
     var teneoSessionId = req.headers["session"];
     console.log(`my session ID: ${teneoSessionId}`);
-
-
+    if(from===undefined || from===null || from=="") {
+      from = triggerFrom ;
+      userInput = triggerInput;
+      console.log(`UPD1 from: ${from}`);
+      console.log(`UPD2 userInput: ${userInput}`);
+    }
     var teneoResponse = "";
 
     // check if we have stored an engine sessionid for this sender
-    
-    var teneoSessionId = sessionHandler.getSession("");
+    if(teneoSessionId===undefined || teneoSessionId===null || teneoSessionId=="") {
+    teneoSessionId = sessionHandler.getSession(from);
     
      
     console.log(`my session ID: ${teneoSessionId}`);
     // send input to engine using stored sessionid and retreive response:
-    teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'cai-connector', 'apiKey': apiKey });
+    teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
     console.log(`teneoResponse: ${teneoResponse.output.text}`);
-    console.log(_stringify(teneoResponse));
+    teneoResponse = teneoResponse.output.text;
     teneoSessionId = teneoResponse.sessionId;
+    }
+    else {
+        teneoResponse = userInput;
+        console.log(`teneoResponse: ${teneoResponse}`);
+    }
     
     // store engine sessionid for this sender
-    sessionHandler.setSession("", teneoSessionId);
+    sessionHandler.setSession(from, teneoSessionId);
 
     // return teneo answer to twilio
-     res.writeHead(200, { 'Content-Type': 'text/json' });
-    res.end(_stringify(teneoResponse.output));
-   //return teneoResponse;
-  });
+    sendTwilioMessage(teneoResponse, res, triggerFrom);
+  }
 }
-                   }
 
+// compose and send message
+function sendTwilioMessage(teneoResponse, res, triggerFrom) {
+const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
+    console.log('trying to send outbound message: ${teneoResponse}');
+    console.log(`to: ${triggerFrom}`)
+    console.log(`from: ${TWILIO_OUTBOUND_NUMBER}`)
+client.messages
+      .create({
+         from: TWILIO_OUTBOUND_NUMBER,
+         body:  teneoResponse,
+         to: triggerFrom
+       })
+      .then(message => console.log(message.sid));
+}
+ else {
+  const message = teneoResponse;
+  const twiml = new MessagingResponse();
+
+  twiml.message(message);
+
+  res.writeHead(200, { 'Content-Type': 'text/xml' });
+  res.end(twiml.toString());
+   console.log(`twim1: ${twiml.toString()}`);
+ }
+}
 
 
 /***
