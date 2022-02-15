@@ -98,7 +98,7 @@ function handleAPIMessages(sessionHandler) {
       apiKey =  req.query["apiKey"];   
       headerApiKey = req.headers["apiKey"];   
       console.log(`headerApiKey from call: ${headerApiKey}`);
-      console.log(`UPD3 from: ${from}`);
+
       console.log(`UPD4 userInput: ${userInput}`);
     }
      if(apiKey===undefined || apiKey===null || apiKey=="") {
@@ -138,7 +138,7 @@ function handleAPIMessages(sessionHandler) {
     teneoSessionId = teneoResponse.sessionId;
     
     // store engine sessionid for this sender
-    sessionHandler.setSession(from, teneoSessionId);
+    sessionHandler.setSession("", teneoSessionId);
 
     // return teneo answer to twilio
      res.writeHead(200, { 'Content-Type': 'text/json' });
