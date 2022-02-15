@@ -90,7 +90,6 @@ function handleAPIMessages(sessionHandler) {
 
      if(triggerInput===undefined || triggerInput===null) {
     post = JSON.parse(body);
-         from = post.from;
          userInput = post.userInput;
          apiKey = post.apiKey;
      }
