@@ -14,184 +14,114 @@
  * limitations under the License.
  */
 
-
-const postPath = {
-  default: '/',
-  outbound: "/outbound"
-};
 const http = require('http');
 const express = require('express');
-const path = require('path');
-//const bodyParser = require('body-parser');
-/**
- * Initialise variables using environment parameters
- */
-const dotenv = require('dotenv');
-dotenv.config();
-const port = process.env.PORT || 3000 ;
+const bodyParser = require('body-parser');
 
-// initialize an Express application
-const app = express();
-const router = express.Router();
-
-// Tell express to use this router with /api before.
-app.use(postPath.default, router);
-
-console.log("I am here");
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const TIE = require('@artificialsolutions/tie-api-client');
 const {
-    TENEO_ENGINE_URL,
-    TWILIO_ACCOUNT_SID,
-    TWILIO_AUTH_TOKEN,
-    TWILIO_OUTBOUND_NUMBER
+    TENEO_ENGINE_URL
 } = process.env;
 
-//const port = process.env.PORT || 4337;
+const port = process.env.PORT || 4337;
 const teneoEngineUrl = process.env.TENEO_ENGINE_URL;
+
+const responseObject = {
+  smsText: ""
+}
+
+const app = express();
 
 // initalise teneo
 const teneoApi = TIE.init(teneoEngineUrl);
 
-// initialise session handler, to store mapping between sender's phone number and the engine session id
-const sessionHandler = SessionHandler();
-
-//app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // twilio message comes in
-router.all(postPath.default, handleTwilioMessages(sessionHandler));
-router.all(postPath.outbound, handleTwilioMessages(sessionHandler));
-//app.post("/", handleTwilioMessages(sessionHandler));
-
-// start the express application
-http.createServer(app).listen(port, () => {
-  console.log(`Listening on port: ${port}`);
-});
+app.post("/", handleAPIMessages());
+app.get("/", handleAPIMessages());
 
 function _stringify (o)
 {
-  const decircularise = () =>
-  {
-    const seen = new WeakSet();
-    return (key,val) => 
+    const decircularise = () =>
     {
-      if( typeof val === "object" && val !== null )
-      {
-        if( seen.has(val) ) return;
-        seen.add(val);
-      }
-      return val;
+        const seen = new WeakSet();
+        return (key,val) => 
+        {
+            if( typeof val === "object" && val !== null )
+            {
+                if( seen.has(val) ) return;
+                seen.add(val);
+            }
+            return val;
+        };
     };
-  };
-  
-  return JSON.stringify( o, decircularise() );
+    
+    return JSON.stringify( o, decircularise() );
 }
 
 // handle incoming twilio message
-function handleTwilioMessages(sessionHandler) {
-  return async (req, res) => {
+function handleAPIMessages() {
 
-    // get the sender's phone number
-    var from = req.body.From;
-    console.log(`from: ${from}`);
+    return async (req, res) => {
 
-    // get message from user
-    var userInput = req.body.Body;
-    console.log(`REQUEST (flattened):`);
-    console.log(_stringify(req));
-    
-    console.log(`RESPONSE (flattened):`);
-    console.log(_stringify(res));
-    const triggerFrom = req.headers["from"];
-    const triggerInput = req.headers["body"];
-    console.log(`from: ${triggerFrom}`);
-    console.log(`userInput: ${triggerInput}`);
-    var teneoSessionId = req.headers["session"];
-    console.log(`my session ID: ${teneoSessionId}`);
-    if(from===undefined || from===null || from=="") {
-      from = triggerFrom ;
-      userInput = triggerInput;
-      console.log(`UPD1 from: ${from}`);
-      console.log(`UPD2 userInput: ${userInput}`);
+        console.log("Called handleAPIMessages");
+        
+        let body = '';
+        var post ;
+        var userInput;
+        var apiKey;
+
+        req.on('data', function (data) {
+          
+            body += data;
+        });
+
+        req.on('end', async function () {
+
+            post = JSON.parse(body);
+            userInput = post.userInput;
+            apiKey = req.headers["apikey"];    
+            
+            console.log("Userinput: " + userInput);
+            console.log("apikey: " + apiKey);
+
+            if (apiKey === '' || apiKey === null || apiKey === 'undefined')
+            {
+                console.log("Returning a 401 response");
+                res.writeHead(401, { 'Content-Type': 'text/json' });
+                res.end();   
+                return;
+            }             
+
+            var teneoResponse = "";
+            var teneoSessionId = "";
+
+            // send input to engine using stored sessionid and retreive response:
+            teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'cai-connector', 'apiKey': apiKey });
+
+            console.log("Response from teneo " + _stringify(teneoResponse));
+        
+            // If api key does not match the one in Teneo
+            if (teneoResponse.output.text === "You are not authorised to access this service.")
+            {
+                console.log("Returning a 401 response");
+                res.writeHead(401, { 'Content-Type': 'text/json' });
+                res.end();
+                return;
+            }
+            
+            // Create the response object which is this API final output
+            var caiConnectorResponse = Object.create(responseObject);
+            caiConnectorResponse.smsText = teneoResponse.output.text;
+
+            // return teneo answer to twilio
+            console.log("Returning a 200 response");
+            res.writeHead(200, { 'Content-Type': 'text/json' });
+            res.end(_stringify(caiConnectorResponse));
+            return;
+        });
     }
-    var teneoResponse = "";
-
-    // check if we have stored an engine sessionid for this sender
-    if(teneoSessionId===undefined || teneoSessionId===null || teneoSessionId=="") {
-    teneoSessionId = sessionHandler.getSession(from);
-    
-     
-    console.log(`my session ID: ${teneoSessionId}`);
-    // send input to engine using stored sessionid and retreive response:
-    teneoResponse = await teneoApi.sendInput(teneoSessionId, { 'text': userInput, 'channel': 'twilio-whatsapp' });
-    console.log(`teneoResponse: ${teneoResponse.output.text}`);
-    teneoResponse = teneoResponse.output.text;
-    teneoSessionId = teneoResponse.sessionId;
-    }
-    else {
-        teneoResponse = userInput;
-        console.log(`teneoResponse: ${teneoResponse}`);
-    }
-    
-    // store engine sessionid for this sender
-    sessionHandler.setSession(from, teneoSessionId);
-
-    // return teneo answer to twilio
-    sendTwilioMessage(teneoResponse, res, triggerFrom);
-  }
-}
-
-// compose and send message
-function sendTwilioMessage(teneoResponse, res, triggerFrom) {
-const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-if(triggerFrom!==undefined && triggerFrom!==null && triggerFrom!="") {
-    console.log('trying to send outbound message: ${teneoResponse}');
-    console.log(`to: ${triggerFrom}`)
-    console.log(`from: ${TWILIO_OUTBOUND_NUMBER}`)
-client.messages
-      .create({
-         from: TWILIO_OUTBOUND_NUMBER,
-         body:  teneoResponse,
-         to: triggerFrom
-       })
-      .then(message => console.log(message.sid));
-}
- else {
-  const message = teneoResponse;
-  const twiml = new MessagingResponse();
-
-  twiml.message(message);
-
-  res.writeHead(200, { 'Content-Type': 'text/xml' });
-  res.end(twiml.toString());
-   console.log(`twim1: ${twiml.toString()}`);
- }
-}
-
-
-/***
- * SESSION HANDLER
- ***/
-function SessionHandler() {
-
-  // Map the sender's phone number to the teneo engine session id. 
-  // This code keeps the map in memory, which is ok for testing purposes
-  // For production usage it is advised to make use of more resilient storage mechanisms like redis
-  const sessionMap = new Map();
-
-  return {
-    getSession: (userId) => {
-      if (sessionMap.size > 0) {
-        return sessionMap.get(userId);
-      }
-      else {
-        return "";
-      }
-    },
-    setSession: (userId, sessionId) => {
-      sessionMap.set(userId, sessionId)
-    }
-  };
 }
 
 http.createServer(app).listen(port, () => {
