@@ -27,7 +27,7 @@ const port = process.env.PORT || 4337;
 const teneoEngineUrl = process.env.TENEO_ENGINE_URL;
 
 const responseObject = {
-  smsText: ""
+  text: ""
 }
 
 const app = express();
@@ -113,7 +113,7 @@ function handleAPIMessages() {
             
             // Create the response object which is this API final output
             var caiConnectorResponse = Object.create(responseObject);
-            caiConnectorResponse.smsText = teneoResponse.output.text;
+            caiConnectorResponse.text = teneoResponse.output.text;
 
             // return teneo answer to twilio
             console.log("Returning a 200 response");
